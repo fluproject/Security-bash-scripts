@@ -9,6 +9,8 @@ CAT_CMD="/bin/cat"
 IPTABLES_CMD="/sbin/iptables"
 GREP_CMD="/bin/grep"
 CUT_CMD="/usr/bin/cut"
+MODPROBE_CMD="/sbin/modprobe"
+LOGGER_CMD="/usr/bin/logger"
 
 if [ ! -z "${SSH_CLIENT}" ]
 then
@@ -21,10 +23,10 @@ then
 	ssh_src="${1}"
 fi
 		
-syslog info "Starting PANIC mode (SSH SOURCE_IP=${ssh_src} SOURCE_PORTS=${ssh_sport} DESTINATION_PORTS=${ssh_dport})"
-echo -n $"FireHOL: Blocking all communications:"
+${LOGGER_CMD} info "Starting PANIC mode (SSH SOURCE_IP=${ssh_src} SOURCE_PORTS=${ssh_sport} DESTINATION_PORTS=${ssh_dport})"
+echo -e $"firewallPanic.sh: Blocking all communications:"
 
-load_kernel_module ip_tables
+${MODPROBE_CMD} ip_tables
 tables=`${CAT_CMD} /proc/net/ip_tables_names`
 for t in ${tables}
 do
