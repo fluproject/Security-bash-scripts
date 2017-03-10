@@ -1,6 +1,12 @@
 #!/bin/bash
+# 
+# firewallPanic.sh - Firewall Blocking all communications.
+#
+# USAGE: ./firewallPanic.sh 192.168.0.10
+# 
+# 192.168.0.10 IP Sysadmin
+#
 
-FIREHOL_MODE="PANIC"
 ssh_src=
 ssh_sport="0:65535"
 ssh_dport="0:65535"
@@ -11,6 +17,16 @@ GREP_CMD="/bin/grep"
 CUT_CMD="/usr/bin/cut"
 MODPROBE_CMD="/sbin/modprobe"
 LOGGER_CMD="/usr/bin/logger"
+
+# Make sure only root can run us.
+if [ ! "${UID}" = 0 ]
+then
+	echo >&2
+	echo >&2
+	echo >&2 "Only user root can run firewallPanic."
+	echo >&2
+	exit 1
+fi
 
 if [ ! -z "${SSH_CLIENT}" ]
 then
@@ -24,7 +40,10 @@ then
 fi
 		
 ${LOGGER_CMD} info "Starting PANIC mode (SSH SOURCE_IP=${ssh_src} SOURCE_PORTS=${ssh_sport} DESTINATION_PORTS=${ssh_dport})"
-echo -e $"firewallPanic.sh: Blocking all communications:"
+echo >&2
+echo >&2
+echo >&2 "firewallPanic.sh: Blocking all communications:"
+echo >&2
 
 ${MODPROBE_CMD} ip_tables
 tables=`${CAT_CMD} /proc/net/ip_tables_names`
