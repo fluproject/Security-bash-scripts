@@ -36,7 +36,7 @@ print_usage() {
   echo " -m  | --motd: change the message of the day (/etc/motd)."
   echo " -is | --issue: change the message of system identification (/etc/issue)."
   echo " -t  | --tty: empty the content of /etc/securetty."
-  echo " -o  | --timeout: set auto logout after a period of inactivity for all the users in your system."
+  echo " -o  | --timeout [time]: set auto logout after a period of inactivity for all the users in your system."
   echo "       --install: install audit and performance tools."
   echo ""
   echo "Usage example: systemsec -o 360"
