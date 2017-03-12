@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # sysinfotask: A simple shell script to to get information about your 
-#              Linux server/desktop and perform simple tunning tasks.
+#              Linux server/desktop and perform simple tuning tasks.
 # Author: @verovan
 # Date: Mar 2017
 #
@@ -28,15 +28,16 @@ print_usage() {
   echo "Usage: ${0##*/} [option] [param]"
   echo "Options:"
   echo " -i  | --info: print operating system info."
-  echo " -u  | --user: print information about your user ."
+  echo " -u  | --user: print information about your user."
   echo " -w  | --who: print who is currently online in your systema."
   echo " -s  | --services: list open ports."
-  echo " -ip | --iptables: check the firewall default policies."
-  echo " -m  | --motd: change /etc/motd."
-  echo " -is | --issue: change /etc/issue."
-  echo " -t  | --tty: delete /etc/securetty."
-  echo " -o  | --timeout: set timeout idle for all the users of your system."
-  echo " --install: install audit and performance tools."
+  echo " -f  | --firewall: check firewall default policies."
+  echo " -y  | --sysctl: kernel tuning via system control variables."
+  echo " -m  | --motd: change the message of the day (/etc/motd)."
+  echo " -is | --issue: change the message of system identification (/etc/issue)."
+  echo " -t  | --tty: empty the content of /etc/securetty."
+  echo " -o  | --timeout: set auto logout after a period of inactivity for all the users in your system."
+  echo "       --install: install audit and performance tools."
   echo ""
   echo "Usage example: systemsec -o 360"
 }
@@ -64,9 +65,13 @@ parse_arguments() {
     -s|--services)
       scan
     ;;
-    -ip|--iptables)
+    -f|--firewall)
       check_root
       check_firewall
+    ;;
+    -y|--sysctl)
+      check_root
+      change_flags
     ;;
     -f|--flags)
       check_root
@@ -175,6 +180,7 @@ change_flags() {
  	echo -e "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.d/net.conf
  	sysctl -p /etc/sysctl.conf 1>/dev/null
  	sysctl -p /etc/sysctl.d/net.conf 1>/dev/null
+  echo -e "Done!"
 }
 
 change_motd() {
@@ -190,7 +196,7 @@ change_motd() {
  		 chmod 644 $motd_file
  	fi
   echo -e $motd > $motd_file
- 	echo -e "The new message of the day that all the user will see when login is: \n\t$motd"
+ 	echo -e "The new message of the day that all the users will see when log in is: \n\t$motd"
 }
 
 change_issue() {
@@ -206,6 +212,7 @@ change_issue() {
 
 change_tty() {
 	 : > /etc/securetty
+  echo -e "Done!"
 }
 
 set_timeout() {
@@ -247,3 +254,4 @@ main() {
 }
 
 main "$@"
+
