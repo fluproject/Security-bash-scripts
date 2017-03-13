@@ -134,84 +134,81 @@ get_user_info() {
 }
 
 who_is_online() {
- 	echo -e "=====Currently logged in users====="
- 	who -H
- 	echo -e "=====Recentlytly logged in users====="
- 	last | head -5
+  echo -e "=====Currently logged in users====="
+  who -H
+  echo -e "=====Recentlytly logged in users====="
+  last | head -5
 }
 
 scan () {
- 	#[[ $# -ne 1 ]] && echo "Indique el nombre del host a escanear." && return 1
- 	for i in {1..9000} ; do #can chage this value
+  #[[ $# -ne 1 ]] && echo "Indique el nombre del host a escanear." && return 1
+  for i in {1..9000} ; do #can chage this value
     #host="$1"
- 		 port=$i
- 		 (echo  > /dev/tcp/127.0.0.1/$port) >& /dev/null && echo "Port $port seems to be open."
- 	done
+    port=$i
+    (echo  > /dev/tcp/127.0.0.1/$port) >& /dev/null && echo "Port $port seems to be open."
+  done
 }
 
 check_firewall() {
- 	echo -e "==========FIREWALL DEFAULT POLICIES=========="
- 	local chains=("INPUT OUTPUT FORWARD")
- 	for c in $chains; do
- 		 if iptables -L $c | grep "(policy DROP)" 1>/dev/null; then
- 			  echo -e "\033[01;31m [ OK ] \033[00m" "Chain $c has the correct default policy."
- 		 else
- 			  if iptables -L $c | grep "(policy ACCEPT)" 1>/dev/null; then
- 				   echo -e "\033[01;31m [ X ] \033[00m" "Default policy for $c is ACCEPT. Change it to DROP."
- 			  else
- 				   echo -e "\033[01;31m [ X ] \033[00m" "Default policy for $c is REJECT. Change it to DROP."
- 			  fi
- 		 fi
- 	done
+  echo -e "==========FIREWALL DEFAULT POLICIES=========="
+  local chains=("INPUT OUTPUT FORWARD")
+  for c in $chains; do
+    if iptables -L $c | grep "(policy DROP)" 1>/dev/null; then
+      echo -e "\033[01;31m [ OK ] \033[00m" "Chain $c has the correct default policy."
+      else
+        if iptables -L $c | grep "(policy ACCEPT)" 1>/dev/null; then
+ 	  echo -e "\033[01;31m [ X ] \033[00m" "Default policy for $c is ACCEPT. Change it to DROP."
+ 	else
+ 	  echo -e "\033[01;31m [ X ] \033[00m" "Default policy for $c is REJECT. Change it to DROP."
+ 	fi
+      fi
+   done
 }
 
 change_flags() {
- 	#0
- 	#egrep -wi 'net.ipv4.conf.all.accept_redirects' | sed -ne 's/\s//g;s/\#//;s/1/0/' /etc/sysctl.conf
- 	#1
- 	#egrep -wi 'tcp_syncookies|net.ipv4.conf.all.log_martians' /etc/sysctl.conf | sed -i 's/\s//g;s/\#//;s/0/1/'
- 	sed -i '{
- 		s/.*net.ipv4.conf.all.accept_redirects.*/net.ipv4.conf.all.accept_redirects=0/
- 		s/.*tcp_syncookies.*/net.ipv4.tcp_syncookies=1/
- 		s/.*net.ipv4.conf.all.log_martians.*/net.ipv4.conf.all.log_martians=1/
- 	}' /etc/sysctl.conf
- 	echo -e "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.d/net.conf
- 	echo -e "net.ipv4.icmp_echo_ignore_broadcasts=1" >> /etc/sysctl.d/net.conf
- 	echo -e "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.d/net.conf
- 	sysctl -p /etc/sysctl.conf 1>/dev/null
- 	sysctl -p /etc/sysctl.d/net.conf 1>/dev/null
+  #0
+  sed -i '{
+  s/.*net.ipv4.conf.all.accept_redirects.*/net.ipv4.conf.all.accept_redirects=0/
+  s/.*tcp_syncookies.*/net.ipv4.tcp_syncookies=1/
+  s/.*net.ipv4.conf.all.log_martians.*/net.ipv4.conf.all.log_martians=1/
+  }' /etc/sysctl.conf
+  echo -e "net.ipv4.icmp_echo_ignore_all=1" >> /etc/sysctl.d/net.conf
+  echo -e "net.ipv4.icmp_echo_ignore_broadcasts=1" >> /etc/sysctl.d/net.conf
+  echo -e "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.d/net.conf
+  sysctl -p /etc/sysctl.conf 1>/dev/null
+  sysctl -p /etc/sysctl.d/net.conf 1>/dev/null
   echo -e "Done!"
 }
 
 change_motd() {
- 	local motd="\nEste sistema es para el uso exclusivo de usuarios autorizados, por lo que las personas que lo\n"
- 	motd+="utilicen estarán sujetos al monitoreo de todas sus actividades en el mismo. Cualquier persona\n"
- 	motd+="que utilice este sistema permite expresamente tal monitoreo y debe estar consciente de que si este\n"
- 	motd+="revelara una posible actividad ilicita, el personal de sistemas proporcionara la evidencia\n"
- 	motd+="del monitoreo al personal de seguridad, con el fin de emprender las acciones civiles y/o legales\n"
- 	motd+="que correspondan.\n"
- 	local motd_file="/etc/motd"
- 	if [[ ! -a $motd_file ]]; then
- 		 touch $motd_file
- 		 chmod 644 $motd_file
- 	fi
+  local motd="\nEste sistema es para el uso exclusivo de usuarios autorizados, por lo que las personas que lo\n"
+  motd+="utilicen estarán sujetos al monitoreo de todas sus actividades en el mismo. Cualquier persona\n"
+  motd+="que utilice este sistema permite expresamente tal monitoreo y debe estar consciente de que si este\n"
+  motd+="revelara una posible actividad ilicita, el personal de sistemas proporcionara la evidencia\n"
+  motd+="del monitoreo al personal de seguridad, con el fin de emprender las acciones civiles y/o legales\n"
+  motd+="que correspondan.\n"
+  local motd_file="/etc/motd"
+  if [[ ! -a $motd_file ]]; then
+    touch $motd_file
+    chmod 644 $motd_file
+  fi
   echo -e $motd > $motd_file
- 	echo -e "The new message of the day that all the users will see when log in is: \n\t$motd"
+  echo -e "The new message of the day that all the users will see when log in is: \n\t$motd"
 }
 
 change_issue() {
- 	local issue="$(uname -s)"
- 	local issue_file="/etc/issue"
- 	if [[ ! -a $issue_file ]]; then
- 	 	touch $issue_file
- 		 chmod 644 $issue_file
- 	fi
+  local issue="$(uname -s)"
+  local issue_file="/etc/issue"
+  if [[ ! -a $issue_file ]]; then
+    touch $issue_file
+    chmod 644 $issue_file
+  fi
   echo -e $issue > $issue_file
- 	echo -e "The message all the users will see in the tty is: \n$issue"
+  echo -e "The message all the users will see in the tty is: \n$issue"
 }
 
 change_tty() {
-	 : > /etc/securetty
+  : > /etc/securetty
   echo -e "Done!"
 }
 
