@@ -105,9 +105,6 @@ parse_arguments() {
       err "Error: Unknown option: $1."
       exit 1
     ;;
-    *)
-      break
-    ;;
   esac
 #done
 }
